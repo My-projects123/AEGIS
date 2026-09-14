@@ -1,0 +1,241 @@
+{
+  "honesty": {
+    "hardware": "NONE \u2014 laptop software-in-the-loop",
+    "signals": "SYNTHETIC demonstration signals",
+    "physical_anc": false,
+    "targets_not_claimed": {
+      "snr_db": 15,
+      "stoi": 0.85,
+      "pesq": 2.5
+    }
+  },
+  "demo_scene": {
+    "input_snr_db": 0.22287376522126606,
+    "output_snr_db": 6.041938407092448,
+    "snr_improvement_db": 5.819064641871182,
+    "input_si_snr_db": 5.419728123433412,
+    "output_si_snr_db": 7.003190070838921,
+    "stoi_noisy": {
+      "value": 0.7845776462111734,
+      "status": "REAL / MEASURED"
+    },
+    "stoi_enhanced": {
+      "value": 0.7396190340154619,
+      "status": "REAL / MEASURED"
+    },
+    "pesq_enhanced": {
+      "available": false,
+      "value": null,
+      "label": "UNAVAILABLE / TARGET only",
+      "reason": "No module named 'pesq'",
+      "target": 2.5
+    },
+    "rtf": 0.015501023359998761,
+    "latency_ms_per_s": 15.501023359998761,
+    "impulse_peak_reduction_db": 18.164898409096295,
+    "impulse_detection_latency_ms": 0.0,
+    "recovery_time_ms": 416.00000000000034,
+    "mode_histogram": {
+      "SPEECH_PRESERVATION": 236,
+      "STATIONARY": 522,
+      "IMPULSE_PROTECTION": 8,
+      "RECOVERY": 18
+    },
+    "switches": 4,
+    "ai_status": {
+      "available": false,
+      "name": "DSP Wiener (POC primary)",
+      "note": "RNNoise not loaded (No module named 'pyrnnoise'). POC uses real DSP enhancement."
+    }
+  },
+  "baselines_demo_scene": [
+    {
+      "system": "Raw noisy",
+      "snr_db": 0.22294956641128938,
+      "si_snr_db": 5.419728123433412,
+      "stoi": {
+        "value": 0.7845776462111734,
+        "status": "REAL / MEASURED"
+      }
+    },
+    {
+      "system": "Classical DSP (fixed Wiener)",
+      "snr_db": 2.9403987680026695,
+      "si_snr_db": 7.348517739080872,
+      "stoi": {
+        "value": 0.78425668762299,
+        "status": "REAL / MEASURED"
+      }
+    },
+    {
+      "system": "AEGIS-COM adaptive (POC)",
+      "snr_db": 6.042980794467006,
+      "si_snr_db": 7.0031985667436745,
+      "stoi": {
+        "value": 0.739598535952362,
+        "status": "REAL / MEASURED"
+      }
+    }
+  ],
+  "snr_sweep_engine_plus_impulse": [
+    {
+      "mix_snr_db": -5,
+      "input_snr_db": -5.0480501796506605,
+      "output_snr_db": -1.4193797557336518,
+      "snr_improvement_db": 3.6286704239170087,
+      "si_snr_in": -5.060037938505451,
+      "si_snr_out": -1.4874091603295976,
+      "stoi": {
+        "value": 0.7139863558311826,
+        "status": "REAL / MEASURED"
+      },
+      "pesq": {
+        "value": null,
+        "status": "UNAVAILABLE / TARGET 2.5"
+      },
+      "impulse_peak_reduction_db": 1.3305175281908077,
+      "detection_latency_ms": null,
+      "recovery_time_ms": null,
+      "rtf": 0.011446572749997188,
+      "mode_histogram": {
+        "SPEECH_PRESERVATION": 54,
+        "STATIONARY": 187,
+        "DYNAMIC": 12
+      }
+    },
+    {
+      "mix_snr_db": 0,
+      "input_snr_db": -0.2354205701444203,
+      "output_snr_db": 3.7020393140642316,
+      "snr_improvement_db": 3.9374598842086517,
+      "si_snr_in": -0.24239385841828348,
+      "si_snr_out": 3.530589749905964,
+      "stoi": {
+        "value": 0.7443611491025307,
+        "status": "REAL / MEASURED"
+      },
+      "pesq": {
+        "value": null,
+        "status": "UNAVAILABLE / TARGET 2.5"
+      },
+      "impulse_peak_reduction_db": 16.49759699659682,
+      "detection_latency_ms": 0.0,
+      "recovery_time_ms": 415.99999999999994,
+      "rtf": 0.011393645749997166,
+      "mode_histogram": {
+        "SPEECH_PRESERVATION": 148,
+        "STATIONARY": 79,
+        "IMPULSE_PROTECTION": 8,
+        "RECOVERY": 18
+      }
+    },
+    {
+      "mix_snr_db": 5,
+      "input_snr_db": 4.371428185869002,
+      "output_snr_db": 8.22375896834066,
+      "snr_improvement_db": 3.8523307824716575,
+      "si_snr_in": 4.367598052390214,
+      "si_snr_out": 8.072209496610311,
+      "stoi": {
+        "value": 0.7837353427071951,
+        "status": "REAL / MEASURED"
+      },
+      "pesq": {
+        "value": null,
+        "status": "UNAVAILABLE / TARGET 2.5"
+      },
+      "impulse_peak_reduction_db": 19.530157587477653,
+      "detection_latency_ms": 0.0,
+      "recovery_time_ms": 415.99999999999994,
+      "rtf": 0.011310791499997145,
+      "mode_histogram": {
+        "SPEECH_PRESERVATION": 187,
+        "STATIONARY": 40,
+        "IMPULSE_PROTECTION": 8,
+        "RECOVERY": 18
+      }
+    },
+    {
+      "mix_snr_db": 10,
+      "input_snr_db": 8.623332206505866,
+      "output_snr_db": 11.864246514665307,
+      "snr_improvement_db": 3.240914308159441,
+      "si_snr_in": 8.621373302600224,
+      "si_snr_out": 11.648807172274878,
+      "stoi": {
+        "value": 0.8137949393850065,
+        "status": "REAL / MEASURED"
+      },
+      "pesq": {
+        "value": null,
+        "status": "UNAVAILABLE / TARGET 2.5"
+      },
+      "impulse_peak_reduction_db": 20.561705379746783,
+      "detection_latency_ms": 0.0,
+      "recovery_time_ms": 415.99999999999994,
+      "rtf": 0.011191833249997207,
+      "mode_histogram": {
+        "SPEECH_PRESERVATION": 210,
+        "STATIONARY": 17,
+        "IMPULSE_PROTECTION": 8,
+        "RECOVERY": 18
+      }
+    },
+    {
+      "mix_snr_db": 15,
+      "input_snr_db": 9.877942506234966,
+      "output_snr_db": 13.091412358373782,
+      "snr_improvement_db": 3.2134698521388163,
+      "si_snr_in": 9.876751208187686,
+      "si_snr_out": 12.89470444459333,
+      "stoi": {
+        "value": 0.8465493364210771,
+        "status": "REAL / MEASURED"
+      },
+      "pesq": {
+        "value": null,
+        "status": "UNAVAILABLE / TARGET 2.5"
+      },
+      "impulse_peak_reduction_db": 22.880948347499526,
+      "detection_latency_ms": 0.0,
+      "recovery_time_ms": 415.99999999999994,
+      "rtf": 0.011602468499997062,
+      "mode_histogram": {
+        "SPEECH_PRESERVATION": 227,
+        "IMPULSE_PROTECTION": 8,
+        "RECOVERY": 18
+      }
+    },
+    {
+      "mix_snr_db": 20,
+      "input_snr_db": 11.673840954884085,
+      "output_snr_db": 12.813168913729502,
+      "snr_improvement_db": 1.139327958845417,
+      "si_snr_in": 11.672842451029759,
+      "si_snr_out": 12.670089329765862,
+      "stoi": {
+        "value": 0.8766564247949681,
+        "status": "REAL / MEASURED"
+      },
+      "pesq": {
+        "value": null,
+        "status": "UNAVAILABLE / TARGET 2.5"
+      },
+      "impulse_peak_reduction_db": 21.762780665297253,
+      "detection_latency_ms": 0.0,
+      "recovery_time_ms": 415.99999999999994,
+      "rtf": 0.011337635499997164,
+      "mode_histogram": {
+        "SPEECH_PRESERVATION": 227,
+        "IMPULSE_PROTECTION": 8,
+        "RECOVERY": 18
+      }
+    }
+  ],
+  "false_impulse_on_clean_speech": {
+    "impulse_protection_frames": 0,
+    "total_frames": 253,
+    "fraction": 0.0,
+    "note": "REAL count on synthetic clean speech. Not a field false-positive rate."
+  }
+}

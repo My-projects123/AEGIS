@@ -1,0 +1,36 @@
+{
+  "params": 13425,
+  "n_bands": 32,
+  "hidden": 48,
+  "epochs": 30,
+  "clips": 320,
+  "train_seconds": 3.91,
+  "size_kb": 50.95,
+  "quantized": true,
+  "heads": [
+    "gain (32-band mask)",
+    "vad (speech present)"
+  ],
+  "vad_accuracy": 0.928,
+  "vad_recall": 0.924,
+  "vad_false_alarm": 0.068,
+  "train_data": "SIMULATED talkers (varied f0/formants/pauses) + engine/rotor/wind/drone/siren/broadband/impulse; 1-in-6 clips noise-only",
+  "augmentation": [
+    "SNR -5..20 dB",
+    "reverb RT60 0.12-0.35 s",
+    "clipping",
+    "level 0.25-1.0"
+  ],
+  "sample_rate": 16000,
+  "win": 512,
+  "hop": 256,
+  "target_device": "Raspberry Pi 4/5 + ONNX Runtime. Pi 1 cannot do real-time.",
+  "pipeline": [
+    "PyTorch",
+    "ONNX",
+    "INT8",
+    "Raspberry Pi",
+    "ONNX Runtime"
+  ],
+  "snr_stoi_pesq": "TARGET 15 dB / 0.85 / 2.5 \u2014 not claimed from this tiny net"
+}

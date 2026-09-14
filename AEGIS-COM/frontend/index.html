@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AEGIS-COM · Live speech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="/static/aegis.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <header class="top">
+    <div>
+      <p class="kicker">SIH26052 · DRDO · Your microphone is the input</p>
+      <h1>ADAPTIVE DEFENCE COMMUNICATION SYSTEM</h1>
+      <p class="sub">Live speech enhancement · hear the room, then hear it cleaned</p>
+    </div>
+    <div class="top-flags">
+      <span class="flag real">REAL mic + DSP</span>
+      <span class="flag real" id="flagMl">TinyML ONNX</span>
+      <span class="flag no">NOT physical ANC</span>
+    </div>
+  </header>
+
+  <section class="ml-pipe" id="mlPipe">
+    <div class="overlay-head">
+      <h2>TinyML edge path · Raspberry Pi</h2>
+      <span class="flag sim" id="mlFlag">loading…</span>
+    </div>
+    <p class="hint">
+      PyTorch → ONNX → INT8 → ONNX Runtime. The same exported file runs on this laptop and on a Pi 4/5.
+      Raspberry Pi 1 (2012) is too slow for real-time 16 kHz enhancement.
+      The net has <b>two heads</b>: a 32-band mask that keeps speech energy, and a <b>VAD</b> that
+      decides whether a human is talking — trained on SIMULATED talkers, so its recall on real voices
+      will be lower than the figure below.
+    </p>
+    <div class="kpi-grid ml-kpis">
+      <div class="kpi"><p class="lbl">Parameters</p><p id="mlParams" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">ONNX size</p><p id="mlSize" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Runtime</p><p id="mlBackend" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Quantized</p><p id="mlQuant" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Hop infer</p><p id="mlHop" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">VAD acc (sim)</p><p id="mlVad" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">SNR/STOI/PESQ</p><p id="mlTgt" class="val">TARGET</p></div>
+    </div>
+    <label class="check ml-toggle">
+      <input id="useTinyMl" type="checkbox" checked />
+      Live mic uses TinyML (ONNX Runtime on this machine) — uncheck for in-browser DSP only
+    </label>
+  </section>
+
+  <section class="live-panel">
+    <div class="live-head">
+      <h2>Live recording · your voice + room sound</h2>
+      <p class="hint">
+        Speak into the mic, then pick a <b>SIMULATED</b> battlefield overlay. You hear your voice plus that disturbance,
+        then the cleaned voice. Overlays are synthetic lab sounds, not field recordings.
+        <b>Use headphones.</b> On speakers the monitor leaks back into the mic and you hear your own room echoing;
+        browser echo cancellation is on, but headphones remove the loop entirely. Monitoring yourself is always
+        delayed by about a tenth of a second — use <b>Monitor off</b> and play back the recorded take to judge quality.
+      </p>
+    </div>
+    <div class="live-controls">
+      <button id="btnMic" class="primary" type="button">START LIVE MIC</button>
+      <button id="btnStopMic" type="button" disabled>STOP</button>
+      <div class="listen-toggle" role="group" aria-label="What you hear">
+        <button id="btnHearRaw" type="button">Hear voice + disturbance</button>
+        <button id="btnHearClean" type="button" class="on">Hear CLEANED voice</button>
+        <button id="btnHearOff" type="button">Monitor off</button>
+      </div>
+      <span id="liveStatus" class="status">Mic idle · click START LIVE MIC</span>
+    </div>
+    <div class="overlay-block">
+      <div class="overlay-head">
+        <h2>Add military disturbance to your mic</h2>
+        <span class="flag sim">SIMULATED overlay</span>
+        <span id="overlayNow" class="overlay-now">Mic only</span>
+      </div>
+      <div id="noiseChips" class="chip-row" role="group" aria-label="Continuous disturbance"></div>
+      <div class="overlay-loud">
+        <label>Disturbance loudness
+          <input id="distGain" type="range" min="10" max="90" value="42" />
+          <span id="distGainVal">42%</span>
+        </label>
+      </div>
+      <p class="lbl impulse-lbl">One-shot impulse (fires into the live mix)</p>
+      <div id="impulseChips" class="chip-row" role="group" aria-label="Impulse overlay"></div>
+    </div>
+    <div class="meter-grid">
+      <div class="meter">
+        <p class="lbl">Voice + disturbance</p>
+        <div class="bar red"><span id="barIn"></span></div>
+        <p id="liveInDb" class="val">— dBFS</p>
+      </div>
+      <div class="meter">
+        <p class="lbl">Cleaned speech</p>
+        <div class="bar"><span id="barOut"></span></div>
+        <p id="liveOutDb" class="val">— dBFS</p>
+      </div>
+      <div class="meter highlight">
+        <p class="lbl">External sound reduced</p>
+        <div class="bar gold"><span id="barRed"></span></div>
+        <p id="liveRed" class="val">— dB</p>
+      </div>
+      <div class="meter">
+        <p class="lbl">Speech clarity in</p>
+        <div class="bar"><span id="barClearIn"></span></div>
+        <p id="liveClearIn" class="val">—</p>
+      </div>
+      <div class="meter highlight">
+        <p class="lbl">Speech clarity out</p>
+        <div class="bar gold"><span id="barClearOut"></span></div>
+        <p id="liveClearOut" class="val">—</p>
+      </div>
+      <div class="meter highlight">
+        <p class="lbl">Reference-mic cancellation</p>
+        <div class="bar gold"><span id="barNlms"></span></div>
+        <p id="liveNlms" class="val">— dB</p>
+      </div>
+      <div class="meter highlight">
+        <p class="lbl">Speech detected · gate</p>
+        <div class="bar gold"><span id="barGate"></span></div>
+        <p id="liveGate" class="val">—</p>
+      </div>
+      <div class="meter">
+        <p class="lbl">Centroid / ZCR</p>
+        <p id="liveCent" class="val">—</p>
+      </div>
+    </div>
+    <p class="hint">
+      Two-mic chain: <b>NLMS adaptive canceller</b> (REAL) subtracts the disturbance picked up by the
+      reference mic, then the mode-aware Wiener stage and the TinyML mask clean the residual. The
+      reference channel here is a <b>SIMULATED</b> second mic — the disturbance reaches it through a
+      different synthetic path, so the filter has to learn that path exactly as it would on a headset.
+      Last, a <b>speech-only gate</b> closes the channel when nobody is talking, so only the human
+      voice is passed. The GRU's VAD head leads the decision; the DSP speech features can override it,
+      but only when strongly confident, so a real talker the net does not recognise is never lost.
+    </p>
+    <div class="live-waves">
+      <div>
+        <h2>RAW · your voice + selected disturbance</h2>
+        <canvas id="waveIn" height="88"></canvas>
+      </div>
+      <div>
+        <h2>CLEANED · your voice after AEGIS-COM</h2>
+        <canvas id="waveOut" height="88"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="status-row">
+    <article class="mode-card">
+      <p class="lbl">Active processing mode</p>
+      <div id="modePill" class="pill idle">STANDBY</div>
+      <p id="modeReason" class="reason">Start the mic to process your room in real time</p>
+    </article>
+    <div class="kpi-grid">
+      <div class="kpi"><p class="lbl">Noise class</p><p id="kClass" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Severity</p><p id="kSev" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Speech P</p><p id="kSpeech" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Impulse P</p><p id="kImp" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Est. SNR</p><p id="kSnr" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Elapsed</p><p id="kTime" class="val">0.00 s</p></div>
+    </div>
+  </section>
+
+  <section class="plots">
+    <div>
+      <h2>Live mode timeline (your session)</h2>
+      <div class="canvas-wrap">
+        <canvas id="timeline" height="88"></canvas>
+        <div id="playhead" class="playhead"></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#1F6B3A"></i> Speech preservation</span>
+        <span><i style="background:#3D7A45"></i> Stationary</span>
+        <span><i style="background:#C4A035"></i> Dynamic</span>
+        <span><i style="background:#9B2D2D"></i> Impulse protection</span>
+        <span><i style="background:#6B8F4E"></i> Recovery</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="yourTake" class="players hidden">
+    <div class="player">
+      <h2 id="lblBefore">Your recording · voice + disturbance</h2>
+      <audio id="audBefore" controls></audio>
+    </div>
+    <div class="player">
+      <h2 id="lblAfter">Your recording · CLEANED voice</h2>
+      <audio id="audAfter" controls></audio>
+    </div>
+  </section>
+
+  <details class="lab">
+    <summary>Optional lab tools (synthetic demo / file upload) — not used unless you open this</summary>
+    <section class="controls">
+      <button id="btnDemo" type="button">SYNTHETIC LAB DEMO</button>
+      <button id="btnProcess" type="button">PROCESS UPLOADED WAV</button>
+      <label class="file">
+        Upload WAV
+        <input id="wavFile" type="file" accept=".wav,audio/wav" />
+      </label>
+      <label>Noise
+        <select id="noiseKind">
+          <option value="none">none</option>
+          <option value="engine">engine</option>
+          <option value="rotor">rotor</option>
+          <option value="wind">wind</option>
+          <option value="engine+impulse">engine + impulse</option>
+        </select>
+      </label>
+      <label>Mix SNR
+        <input id="snr" type="range" min="-5" max="20" value="6" />
+        <span id="snrVal">6 dB</span>
+      </label>
+      <label class="check"><input id="forceImpulse" type="checkbox" /> Force impulse</label>
+      <label class="check hidden"><input id="liveEngine" type="checkbox" /> Mix simulated engine</label>
+      <div id="status" class="status">Lab tools only. Live mic does not use these files.</div>
+    </section>
+    <section id="stages" class="stages hidden"></section>
+    <section class="metrics" id="metrics">
+      <div class="kpi"><p class="lbl">Input SNR</p><p id="mIn" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Output SNR</p><p id="mOut" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">SNR improvement</p><p id="mDelta" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">SI-SNR</p><p id="mSi" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">STOI</p><p id="mStoi" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">PESQ</p><p id="mPesq" class="val">n/a</p></div>
+      <div class="kpi"><p class="lbl">Impulse peak red.</p><p id="mPeak" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Detect / recovery</p><p id="mDet" class="val">—</p></div>
+      <div class="kpi"><p class="lbl">Laptop RTF</p><p id="mRtf" class="val">—</p></div>
+    </section>
+    <div class="split hidden" id="labPlots">
+      <div>
+        <h2>Lab waveform</h2>
+        <img id="imgWave" alt="" />
+      </div>
+      <div>
+        <h2>Lab spectrogram</h2>
+        <img id="imgSpec" alt="" />
+      </div>
+    </div>
+    <img id="imgTimeline" class="hidden" alt="" />
+  </details>
+
+  <section id="honesty" class="honesty">
+    Live path uses <b>your microphone</b>. Battlefield overlays are <b>SIMULATED</b> and mixed onto that mic in software.
+    “Hear voice + disturbance” is the mix; “Hear CLEANED voice” is the enhancer output. Not analog ANC at the ear.
+  </section>
+
+  <footer>AEGIS-COM · SIH26052 · User-defined live input</footer>
+</body>
+</html>
